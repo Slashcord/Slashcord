@@ -21,44 +21,28 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+from aiohttp import ClientSession, ClientResponse
+from json import JSONDecodeError
 
-class SlashCordException(Exception):
-    """Base exception for SlashCord.
-    """
-
-    pass
+from ._exceptions import HttpException
 
 
-class HttpException(SlashCordException):
-    """Raised when HTTP exception.
-    """
+class HttpClient:
+    BASE_URL: str
+    _requests: ClientSession
 
-    pass
+    async def __handle_resp(self, resp: ClientResponse) -> dict:
+        try:
+            json = await resp.json()
+        except JSONDecodeError:
+            raise HttpException()
+        else:
+            if resp.status in (200, 201):
+                return json
+            else:
+                raise HttpException()
 
-
-class CommandConfigException(SlashCordException):
-    """Command configuration based exception.
-    """
-
-    pass
-
-
-class InvalidName(CommandConfigException):
-    """Raised when command name is invalid.
-    """
-
-    pass
-
-
-class InvalidChoiceName(CommandConfigException):
-    """Raised when choice name is invalid.
-    """
-
-    pass
-
-
-class InvalidDescription(CommandConfigException):
-    """Raised when description is invalid.
-    """
-
-    pass
+    async def _post(self, pathway: str, payload: dict) -> dict:
+        async with self._requests.post(self.BASE_URL + pathway,
+                                       json=payload) as resp:
+            await self.__handle_resp(resp)

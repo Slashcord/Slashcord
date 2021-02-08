@@ -23,27 +23,32 @@ SOFTWARE.
 
 from aiohttp import ClientSession
 
-from ._settings import Command, CommandChoices
+from ._settings import Command, CommandChoice
 from ._exceptions import (
     SlashCordException,
+    HttpException,
     CommandConfigException,
     InvalidName,
-    InvalidDescription
+    InvalidDescription,
+    InvalidChoiceName
 )
+from ._http import HttpClient
 
 assert Command
-assert CommandChoices
+assert CommandChoice
 
 assert SlashCordException
+assert HttpException
 assert CommandConfigException
 assert InvalidName
 assert InvalidDescription
+assert InvalidChoiceName
 
 
-class SlashCord:
+class SlashCord(HttpClient):
     BASE_URL = "https://discord.com/api/v8/"
 
-    def __init__(self, token: str, application_id: int,
+    def __init__(self, token: str, client_id: int,
                  public_key: str) -> None:
         if len(token) == 32:
             auth = "Bearer "
@@ -56,8 +61,19 @@ class SlashCord:
             headers={"Authorization": auth}
         )
 
-        self.application_id = application_id
-        self.public_key = public_key
+        self._client_id = client_id
+        self._public_key = public_key
 
-    async def create_command(self) -> None:
-        pass
+    async def close(self) -> None:
+        """Close underlying sessions.
+        """
+
+        await self._requests.close()
+
+    async def create_command(self, command: Command) -> None:
+        data = await self._post(
+            "/applications/{}/commands".format(self._client_id),
+            payload=command._payload
+        )
+
+        print(data)

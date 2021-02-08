@@ -26,7 +26,11 @@ from __future__ import annotations
 import re
 from typing import Any, List, Optional
 
-from ._exceptions import InvalidName, InvalidDescription
+from ._exceptions import (
+    InvalidName,
+    InvalidDescription,
+    InvalidChoiceName
+)
 
 
 # Types
@@ -41,14 +45,37 @@ ROLE = 8
 
 # Regexps
 ROOT_NAME_REGEX = r"^[\w-]{3,32}$"
-DESC_REGEX = r"^[\w-]{1,100}$"
 NAME_REGEX = r"^[\w-]{1,32}$"
 
 
-class CommandChoices:
+def check_length(value: str, exception: Exception,
+                 min_: int = 1, max_: int = 100) -> None:
+    """Used to check length of value and raise exception
+       if not matched.
+
+    Parameters
+    ----------
+    value : str
+    exception : Exception
+    min_ : int, optional
+        by default 1
+    max_ : int, optional
+        by default 100
+
+    Raises
+    ------
+    exception
+        Whatever expection was passed.
+    """
+
+    value_len = len(value)
+    if value_len < min_ or value_len > max_:
+        raise exception()
+
+
+class CommandChoice:
     def __init__(self, name: str, value: str) -> None:
-        if not re.match(DESC_REGEX, name):
-            raise InvalidName()
+        check_length(name, InvalidChoiceName)
 
         self._name = name
         self._value = value
@@ -59,7 +86,7 @@ class CommandType:
         self._upper = upper
         self._option = option
 
-    def string(self, choices: Optional[List[CommandChoices]] = None
+    def string(self, choices: Optional[List[CommandChoice]] = None
                ) -> Command:
 
         self._option["type"] = STRING
@@ -90,11 +117,10 @@ class Command:
         InvalidDescription
         """
 
-        if not re.match(ROOT_NAME_REGEX, name):
+        if not re.search(ROOT_NAME_REGEX, name):
             raise InvalidName()
 
-        if not re.match(DESC_REGEX, description):
-            raise InvalidDescription()
+        check_length(description, InvalidDescription)
 
         self._payload = {
             "name": name,
@@ -106,11 +132,10 @@ class Command:
                required: bool = False
                ) -> CommandType:
 
-        if not re.match(NAME_REGEX, name):
+        if not re.search(NAME_REGEX, name):
             raise InvalidName()
 
-        if not re.match(DESC_REGEX, description):
-            raise InvalidDescription()
+        check_length(description, InvalidDescription)
 
         option = {
             "name": name,

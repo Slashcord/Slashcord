@@ -21,44 +21,31 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import asynctest
 
-class SlashCordException(Exception):
-    """Base exception for SlashCord.
-    """
-
-    pass
+from . import SlashCord, Command, CommandChoice
 
 
-class HttpException(SlashCordException):
-    """Raised when HTTP exception.
-    """
+class TestSlashCord(asynctest.TestCase):
+    use_default_loop = True
 
-    pass
+    async def setUp(self) -> None:
+        self.slash_cord = SlashCord(
+            token="...",
+            client_id="...",
+            public_key="..."
+        )
 
+    async def tearDown(self) -> None:
+        await self.slash_cord.close()
 
-class CommandConfigException(SlashCordException):
-    """Command configuration based exception.
-    """
-
-    pass
-
-
-class InvalidName(CommandConfigException):
-    """Raised when command name is invalid.
-    """
-
-    pass
-
-
-class InvalidChoiceName(CommandConfigException):
-    """Raised when choice name is invalid.
-    """
-
-    pass
-
-
-class InvalidDescription(CommandConfigException):
-    """Raised when description is invalid.
-    """
-
-    pass
+    async def test_create_command(self) -> None:
+        await self.slash_cord.create_command(
+            Command(
+                "test", "Command created by SlashCord for testing"
+            ).option(
+                "choice", "Choices you can select", required=True
+            ).string([
+                CommandChoice("Choice 1", "choice_1")
+            ])
+        )

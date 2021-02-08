@@ -21,44 +21,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import unittest
 
-class SlashCordException(Exception):
-    """Base exception for SlashCord.
-    """
-
-    pass
+from slashcord.tests import *  # noqa: F403, F401
 
 
-class HttpException(SlashCordException):
-    """Raised when HTTP exception.
-    """
-
-    pass
-
-
-class CommandConfigException(SlashCordException):
-    """Command configuration based exception.
-    """
-
-    pass
-
-
-class InvalidName(CommandConfigException):
-    """Raised when command name is invalid.
-    """
-
-    pass
-
-
-class InvalidChoiceName(CommandConfigException):
-    """Raised when choice name is invalid.
-    """
-
-    pass
-
-
-class InvalidDescription(CommandConfigException):
-    """Raised when description is invalid.
-    """
-
-    pass
+if __name__ == "__main__":
+    unittest.main()
