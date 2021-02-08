@@ -58,6 +58,19 @@ class SlashCord(HttpClient):
 
     def __init__(self, token: str, client_id: int,
                  public_key: str) -> None:
+        """Wrapper for Discord's slash commands!
+
+        Parameters
+        ----------
+        token : str
+            You can use either your bot token or a client credentials token
+            for your app with the applications.commmands.update scope
+        client_id : int
+            Client / Application ID.
+        public_key : str
+            Client public key.
+        """
+
         if len(token) == 32:
             auth = "Bearer "
         else:
