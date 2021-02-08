@@ -74,7 +74,16 @@ def check_length(value: str, exception: Exception,
 
 
 class CommandChoice:
-    def __init__(self, name: str, value: str) -> None:
+    def __init__(self, name: str, value: Any = None) -> None:
+        """Used command choice.
+
+        Parameters
+        ----------
+        name : str
+        value : Any, optional
+            Only required for string / integer command choice
+        """
+
         check_length(name, InvalidChoiceName)
 
         self._name = name
@@ -83,11 +92,75 @@ class CommandChoice:
 
 class CommandType:
     def __init__(self, upper: Command, option: List[Any]) -> None:
+        """Used to set command type.
+
+        Parameters
+        ----------
+        upper : Command
+        option : List[Any]
+        """
+
         self._upper = upper
         self._option = option
 
+    def boolean(self, choices: Optional[List[CommandChoice]] = None
+                ) -> Command:
+        """Used to set boolean choices.
+
+        Parameters
+        ----------
+        choices : Optional[List[CommandChoice]], optional
+            by default None
+
+        Returns
+        -------
+        Command
+        """
+
+        self._option["type"] = BOOLEAN
+
+        if choices:
+            self._option["choices"] = [choice._name for choice in choices]
+
+        return self
+
+    def integer(self, choices: Optional[List[CommandChoice]] = None
+                ) -> Command:
+        """Used to set integer command type.
+
+        Parameters
+        ----------
+        choices : Optional[List[CommandChoice]], optional
+            by default None
+
+        Returns
+        -------
+        Command
+        """
+
+        self._option["type"] = INTEGER
+
+        if choices:
+            self._option["choices"] = [{
+                "name": choice._name,
+                "value": choice._value
+            } for choice in choices]
+
+        return self._upper
+
     def string(self, choices: Optional[List[CommandChoice]] = None
                ) -> Command:
+        """Used to set string command type.
+
+        Parameters
+        ----------
+        choices : Optional[List[CommandChoice]], optional
+            by default None
+
+        Returns
+        -------
+        Command
+        """
 
         self._option["type"] = STRING
 
@@ -131,6 +204,23 @@ class Command:
     def option(self, name: str, description: str,
                required: bool = False
                ) -> CommandType:
+        """Used to set option.
+
+        Parameters
+        ----------
+        name : str
+        description : str
+        required : bool, optional
+            by default False
+
+        Returns
+        -------
+        CommandType
+
+        Raises
+        ------
+        InvalidName
+        """
 
         if not re.search(NAME_REGEX, name):
             raise InvalidName()

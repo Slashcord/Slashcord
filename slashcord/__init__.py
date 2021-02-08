@@ -32,10 +32,13 @@ from ._exceptions import (
     InvalidDescription,
     InvalidChoiceName
 )
+from ._guild import Guild
+from ._message import Message, Embed
 from ._http import HttpClient
 
 assert Command
 assert CommandChoice
+assert Message, Embed
 
 assert SlashCordException
 assert HttpException
@@ -91,13 +94,27 @@ class SlashCord(HttpClient):
 
         await self._requests.close()
 
+    def guild(self, guild_id: int) -> Guild:
+        """Used to interact with guild.
+
+        Parameters
+        ----------
+        guild_id : int
+
+        Returns
+        -------
+        Guild
+        """
+
+        return Guild(self, guild_id)
+
     async def commands(self) -> None:
         await self._get(
-            "/applications/{}/commands".format(self._client_id)
+            "applications/{}/commands".format(self._client_id)
         )
 
     async def create_command(self, command: Command) -> None:
         await self._post(
-            "/applications/{}/commands".format(self._client_id),
+            "applications/{}/commands".format(self._client_id),
             payload=command._payload
         )
