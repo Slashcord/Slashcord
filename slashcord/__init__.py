@@ -36,8 +36,7 @@ from ._guild import Guild
 from ._message import Message, Embed
 from ._http import HttpClient
 
-assert Command
-assert CommandChoice
+assert Command, CommandChoice
 assert Message, Embed
 
 assert SlashCordException
