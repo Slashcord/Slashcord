@@ -45,6 +45,14 @@ assert InvalidDescription
 assert InvalidChoiceName
 
 
+__version__ = "0.0.1"
+__url__ = "https://slashcord.readthedocs.io/en/latest/"
+__description__ = "Discord's slash commands built for asyncio python."
+__author__ = "WardPearce"
+__author_email__ = "wardpearce@protonmail.com"
+__license__ = "MIT"
+
+
 class SlashCord(HttpClient):
     BASE_URL = "https://discord.com/api/v8/"
 
@@ -70,10 +78,13 @@ class SlashCord(HttpClient):
 
         await self._requests.close()
 
+    async def commands(self) -> None:
+        data = await self._get(
+            "/applications/{}/commands".format(self._client_id)
+        )
+
     async def create_command(self, command: Command) -> None:
         data = await self._post(
             "/applications/{}/commands".format(self._client_id),
             payload=command._payload
         )
-
-        print(data)

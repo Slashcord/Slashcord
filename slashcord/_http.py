@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import logging
+
 from aiohttp import ClientSession, ClientResponse
 from json import JSONDecodeError
 
@@ -32,6 +34,7 @@ class HttpClient:
     _requests: ClientSession
 
     async def __handle_resp(self, resp: ClientResponse) -> dict:
+        print(await resp.read())
         try:
             json = await resp.json()
         except JSONDecodeError:
@@ -40,9 +43,15 @@ class HttpClient:
             if resp.status in (200, 201):
                 return json
             else:
+                logging.error(json)
                 raise HttpException()
 
-    async def _post(self, pathway: str, payload: dict) -> dict:
+    async def _post(self, pathway: str, payload: dict = None) -> dict:
         async with self._requests.post(self.BASE_URL + pathway,
                                        json=payload) as resp:
-            await self.__handle_resp(resp)
+            return await self.__handle_resp(resp)
+
+    async def _get(self, pathway: str, payload: dict = None) -> dict:
+        async with self._requests.get(self.BASE_URL + pathway,
+                                      json=payload) as resp:
+            return await self.__handle_resp(resp)

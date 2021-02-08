@@ -39,10 +39,13 @@ class TestSlashCord(asynctest.TestCase):
     async def tearDown(self) -> None:
         await self.slash_cord.close()
 
+    async def test_getting_commds(self) -> None:
+        await self.slash_cord.commands()
+
     async def test_create_command(self) -> None:
         await self.slash_cord.create_command(
             Command(
-                "test", "Command created by SlashCord for testing"
+                "word", "Command created by SlashCord for testing"
             ).option(
                 "choice", "Choices you can select", required=True
             ).string([
