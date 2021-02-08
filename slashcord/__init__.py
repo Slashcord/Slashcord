@@ -79,12 +79,12 @@ class SlashCord(HttpClient):
         await self._requests.close()
 
     async def commands(self) -> None:
-        data = await self._get(
+        await self._get(
             "/applications/{}/commands".format(self._client_id)
         )
 
     async def create_command(self, command: Command) -> None:
-        data = await self._post(
+        await self._post(
             "/applications/{}/commands".format(self._client_id),
             payload=command._payload
         )
