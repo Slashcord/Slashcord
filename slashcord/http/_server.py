@@ -3,7 +3,6 @@ from json import JSONDecodeError, JSONDecoder
 from nacl.exceptions import BadSignatureError
 
 
-
 class HttpServer:
     def __init__(self, ip: str, port: int, upper: object) -> None:
         """Used to create a lightweight HTTP server.
