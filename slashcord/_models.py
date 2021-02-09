@@ -25,6 +25,9 @@ from typing import Any, Dict, List
 from datetime import datetime
 
 
+TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S%Z"
+
+
 class Option:
     name: str
     value: str
@@ -73,19 +76,21 @@ class Member:
     is_pending: bool
     deaf: bool
 
-    def __init__(self, user: User, roles: List[str], premium_since: datetime,
+    def __init__(self, user: User, roles: List[str], premium_since: str,
                  permissions: int, pending: bool,
-                 nick: str, mute: bool, joined_at: datetime,
+                 nick: str, mute: bool, joined_at: str,
                  is_pending: bool, deaf: bool) -> None:
 
         self.user = user
         self.roles = roles
-        self.premium_since = premium_since
+        self.premium_since = datetime.strptime(
+            premium_since, TIMESTAMP_FORMAT
+        ) if premium_since else None
         self.permissions = permissions
         self.pending = pending
         self.nick = nick
         self.mute = mute
-        self.joined_at = joined_at
+        self.joined_at = datetime.strptime(joined_at, TIMESTAMP_FORMAT)
         self.is_pending = is_pending
         self.deaf = deaf
 
