@@ -104,7 +104,7 @@ class WebhookModel:
     data: Data
     channel_id: str
 
-    def __init__(self, type: int, token: str, member: Dict[Any], id: str,
+    def __init__(self, type: int, token: str, member: Dict[str, Any], id: str,
                  guild_id: str, data: Data, channel_id: str) -> None:
 
         self.type = type
@@ -114,3 +114,19 @@ class WebhookModel:
         self.guild_id = guild_id
         self.data = data
         self.channel_id = channel_id
+
+
+class CommandModel:
+    id: str
+    application_id: str
+    name: str
+    description: str
+    version: str
+
+    def __init__(self, id: str, application_id: str, name: str,
+                 description: str, version: str, *args, **kwargs) -> None:
+        self.id = id
+        self.application_id = application_id
+        self.name = name
+        self.description = description
+        self.version = version

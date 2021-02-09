@@ -47,7 +47,7 @@ from ._exceptions import (
     StartupNotCalled
 )
 from ._guild import Guild
-from ._models import WebhookModel
+from ._models import WebhookModel, CommandModel
 from ._message import Message, Embed
 from .http import HttpClient, HttpServer
 
@@ -141,6 +141,18 @@ class SlashCord(HttpClient):
         self._client_id = client_id
         self._verify_key = VerifyKey(bytes.fromhex(public_key))
 
+        # {
+        #   "command_id": List[Coroutine],
+        # }
+        self._global_commands = {}
+
+        # {
+        #   "guild_id": {
+        #       "command_id": List[Coroutine],
+        #    }
+        # }
+        self._guild_commands = {}
+
     async def start(self) -> None:
         """Used to start up SlashCord, must be called
            before making any other calls.
@@ -173,20 +185,31 @@ class SlashCord(HttpClient):
         if self._server:
             await self._server.close()
 
-    def listen(self, command: Command = None):
+    def listener(self, command: Command):
         """Used to listen to command.
 
         Parameters
         ----------
-        command : Command, optional
-            Command to listen to, if None all commands
-            will be received.
+        command : Command
+
+        Notes
+        -----
+        Webhook server must be enabled.
         """
+
+        assert self._server
 
         def decorator(func):
             @wraps(func)
             async def _add_listener(*args, **kwargs):
-                pass
+                # Keep it simple and just overwrite the command
+                # every time the script is started.
+                command_id = (await self.create_command(command)).id
+
+                if command_id not in self._global_commands:
+                    self._global_commands[command_id] = []
+
+                self._global_commands[command_id].append(func)
 
             return _add_listener
 
@@ -250,8 +273,10 @@ class SlashCord(HttpClient):
             "applications/{}/commands".format(self._client_id)
         )
 
-    async def create_command(self, command: Command) -> None:
-        await self._post(
+    async def create_command(self, command: Command) -> CommandModel:
+        data = await self._post(
             "applications/{}/commands".format(self._client_id),
             payload=command._payload
         )
+
+        return CommandModel(**data)

@@ -21,45 +21,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from functools import wraps
+from asyncio import iscoroutinefunction
+from typing import Coroutine, List
 
-from ._settings import Command
+from ._models import WebhookModel
 
 
-class Guild:
-    def __init__(self, upper: object, guild_id: int) -> None:
-        self._upper = upper
-        self.guild_id = guild_id
-
-    def listener(self, command: Command = None):
-        """Used to listen to command.
-
-        Parameters
-        ----------
-        command : Command, optional
-            Command to listen to, if None all commands
-            will be received.
-
-        Notes
-        -----
-        Webhook server must be enabled.
-        """
-
-        assert self._upper._server
-
-        def decorator(func):
-            @wraps(func)
-            async def _add_listener(*args, **kwargs):
-                pass
-
-            return _add_listener
-
-        return decorator
-
-    async def create_command(self, command: Command) -> None:
-        await self._upper._post(
-            "applications/{}/guilds/{}/commands".format(
-                self._upper.client_id, self.guild_id
-            ),
-            payload=command._payload
-        )
+async def call_listeners(funcs: List[Coroutine],
+                         webhook: WebhookModel) -> None:
+    for func in funcs:
+        if iscoroutinefunction(func):
+            await func(webhook=webhook)
+        else:
+            func(webhook=webhook)
