@@ -26,25 +26,14 @@ import asynctest
 from . import SlashCord, Command, CommandChoice
 
 
-global port
-port = 8888
-
-
 class TestSlashCord(asynctest.TestCase):
     use_default_loop = True
 
     async def setUp(self) -> None:
-        global port
-
-        # We'll just open another HTTP server on a different
-        # port for each test.
-        port += 1
-
         self.slash_cord = SlashCord(
             token="...",
             client_id="...",
-            public_key="...",
-            port=port
+            public_key="..."
         )
 
         await self.slash_cord.start()

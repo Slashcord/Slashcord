@@ -29,6 +29,25 @@ class SlashCordException(Exception):
     pass
 
 
+class WebhookException(SlashCordException):
+    """Based webhook exception
+    """
+
+
+class InvalidJson(WebhookException):
+    """Raised when json is invalid.
+    """
+
+    pass
+
+
+class InvalidSignature(WebhookException):
+    """Raised when signature is invalid.
+    """
+
+    pass
+
+
 class HttpException(SlashCordException):
     """Raised when HTTP exception.
     """

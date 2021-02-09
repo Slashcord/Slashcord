@@ -1,6 +1,6 @@
 from aiohttp import web
-from json import JSONDecodeError, JSONDecoder
-from nacl.exceptions import BadSignatureError
+
+from .._exceptions import InvalidSignature, InvalidJson
 
 
 class HttpServer:
@@ -53,6 +53,12 @@ class HttpServer:
         site = web.TCPSite(self._runner, self._ip, self._port)
         await site.start()
 
+    async def close(self) -> None:
+        """Closes lightweight HTTP server.
+        """
+
+        await self._runner.cleanup()
+
     async def handler(self, request: web.Request) -> web.json_response:
         """Used to handle HTTP request.
 
@@ -75,20 +81,18 @@ class HttpServer:
         body = await request.read()
 
         try:
-            self._upper._verify_key.verify(
-                (
-                    request.headers["X-Signature-Timestamp"] + str(body)
-                ).encode(),
-                bytes.fromhex(request.headers["X-Signature-Ed25519"])
+            json = self._upper.webhook(
+                request.headers["X-Signature-Ed25519"],
+                request.headers["X-Signature-Timestamp"],
+                body
             )
-        except BadSignatureError:
+        except InvalidSignature:
             return self.__response(
                 error="Invalid request signature", status_code=401
             )
-
-        try:
-            json = JSONDecoder(body)
-        except JSONDecodeError:
+        except InvalidJson:
             return self.__response(error="Invalid json", status_code=400)
 
-        return self.__response(data=json)
+        json
+
+        return self.__response()

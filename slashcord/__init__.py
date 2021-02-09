@@ -22,22 +22,34 @@ SOFTWARE.
 """
 
 from aiohttp import ClientSession
-from nacl.signing import VerifyKey
 
-from ._settings import Command, CommandChoice
+from json import JSONDecodeError, JSONDecoder
+
+from nacl.signing import VerifyKey
+from nacl.exceptions import BadSignatureError
+
+from ._settings import (
+    Command,
+    CommandChoice,
+    WebhookServer
+)
 from ._exceptions import (
     SlashCordException,
     HttpException,
     CommandConfigException,
     InvalidName,
     InvalidDescription,
-    InvalidChoiceName
+    InvalidChoiceName,
+    WebhookException,
+    InvalidSignature,
+    InvalidJson
 )
 from ._guild import Guild
 from ._message import Message, Embed
 from .http import HttpClient, HttpServer
 
 assert Command, CommandChoice
+assert WebhookServer
 assert Message, Embed
 
 assert SlashCordException
@@ -46,6 +58,9 @@ assert CommandConfigException
 assert InvalidName
 assert InvalidDescription
 assert InvalidChoiceName
+assert WebhookException
+assert InvalidSignature
+assert InvalidJson
 
 
 __version__ = "0.0.1"
@@ -60,8 +75,8 @@ class SlashCord(HttpClient):
     BASE_URL = "https://discord.com/api/v8/"
 
     def __init__(self, token: str, client_id: int,
-                 public_key: str, ip: str = "localhost",
-                 port: int = 8888) -> None:
+                 public_key: str,
+                 webhook_server: WebhookServer = WebhookServer()) -> None:
         """Wrapper for Discord's slash commands!
 
         Parameters
@@ -73,16 +88,24 @@ class SlashCord(HttpClient):
             Client / Application ID.
         public_key : str
             Client public key.
-        ip : str, optional
-            Ip of webhook server by default "localhost"
-        port : int, optional
-            Port of webhook server by default 8888
+        webhook_server : WebhookServer, optional
+            Used to configure webhook server, set as None to disable.
+            by default WebhookServer
 
         Notes
         -----
         Calling self.start
         ~~~~~~~~~~~~~~~~~~
         await self.start must be called before using.
+
+        WebhookServer not passed
+        ~~~~~~~~~~~~~~~~~~~~~~~~
+        If the webhook server configuration isn't passed
+        the decorator won't work
+
+        The point of this is so you can use this wrapper
+        without having to run a HTTP server, what you might
+        already be running.
 
         Reverse Proxy
         ~~~~~~~~~~~~~
@@ -95,7 +118,13 @@ class SlashCord(HttpClient):
         else:
             self._auth = "Bot "
 
-        self._server = HttpServer(ip, port, self)
+        if webhook_server:
+            self._server = HttpServer(
+                webhook_server._ip, webhook_server._port, self
+            )
+        else:
+            self._server = None
+
         self._requests = None
 
         self._client_id = client_id
@@ -117,7 +146,8 @@ class SlashCord(HttpClient):
             headers={"Authorization": self._auth}
         )
 
-        await self._server.start()
+        if self._server:
+            await self._server.start()
 
     async def close(self) -> None:
         """Close underlying sessions.
@@ -129,6 +159,49 @@ class SlashCord(HttpClient):
 
         assert self._requests
         await self._requests.close()
+
+        if self._server:
+            await self._server.close()
+
+    def webhook(self, ed25519: str, timestamp: str,
+                body: bytes) -> dict:
+        """Used to validate webhook.
+
+        Parameters
+        ----------
+        ed25519 : str
+            X-Signature-Ed25519 header.
+        timestamp : str
+            X-Signature-Timestamp header.
+        body : bytes
+            Request body.
+
+        Raises
+        ------
+        WebhookException
+            InvalidJson
+            InvalidSignature
+
+        Returns
+        -------
+        dict
+            Json data.
+        """
+
+        try:
+            json = JSONDecoder(body)
+        except JSONDecodeError:
+            raise InvalidJson()
+
+        try:
+            self._verify_key.verify(
+                (ed25519 + str(body)).encode(),
+                bytes.fromhex(timestamp)
+            )
+        except BadSignatureError:
+            raise InvalidSignature()
+
+        return json
 
     def guild(self, guild_id: int) -> Guild:
         """Used to interact with guild.

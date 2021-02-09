@@ -236,3 +236,20 @@ class Command:
         self._payload["options"].append(option)
 
         return CommandType(self, self._payload["options"][-1])
+
+
+class WebhookServer:
+    def __init__(self, ip: str = "localhost",
+                 port: int = 8888) -> None:
+        """Used to configure webhook server.
+
+        Parameters
+        ----------
+        ip : str, optional
+            Ip of webhook server by default "localhost"
+        port : int, optional
+            Port of webhook server by default 8888
+        """
+
+        self._ip = ip
+        self._port = port
