@@ -94,6 +94,4 @@ class HttpServer:
         except InvalidJson:
             return self.__response(error="Invalid json", status_code=400)
 
-        webhook
-
-        return self.__response()
+        return self.__response({"type": webhook.type})
