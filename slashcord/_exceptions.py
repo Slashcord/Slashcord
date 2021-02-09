@@ -29,6 +29,12 @@ class SlashCordException(Exception):
     pass
 
 
+class StartupNotCalled(SlashCordException):
+    """Raised when self.start hasn't been called before
+       making a request.
+    """
+
+
 class WebhookException(SlashCordException):
     """Based webhook exception
     """

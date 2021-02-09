@@ -42,7 +42,8 @@ from ._exceptions import (
     InvalidChoiceName,
     WebhookException,
     InvalidSignature,
-    InvalidJson
+    InvalidJson,
+    StartupNotCalled
 )
 from ._guild import Guild
 from ._message import Message, Embed
@@ -61,9 +62,10 @@ assert InvalidChoiceName
 assert WebhookException
 assert InvalidSignature
 assert InvalidJson
+assert StartupNotCalled
 
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 __url__ = "https://slashcord.readthedocs.io/en/latest/"
 __description__ = "Discord's slash commands built for asyncio python."
 __author__ = "WardPearce"
@@ -101,11 +103,14 @@ class SlashCord(HttpClient):
         WebhookServer not passed
         ~~~~~~~~~~~~~~~~~~~~~~~~
         If the webhook server configuration isn't passed
-        the decorator won't work
+        the command decorator won't work
 
         The point of this is so you can use this wrapper
         without having to run a HTTP server, what you might
         already be running.
+
+        The self.webhook can be used to validate & phrase
+        json data given.
 
         Reverse Proxy
         ~~~~~~~~~~~~~

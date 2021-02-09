@@ -23,10 +23,22 @@ SOFTWARE.
 
 import logging
 
+from functools import wraps
 from aiohttp import ClientSession, ClientResponse
 from json import JSONDecodeError
 
-from .._exceptions import HttpException
+from .._exceptions import HttpException, StartupNotCalled
+
+
+def requests_init_required(func):
+    @wraps(func)
+    def _validate(*args, **kwargs):
+        if args[0]._requests:
+            return func(*args, **kwargs)
+        else:
+            raise StartupNotCalled()
+
+    return _validate
 
 
 class HttpClient:
@@ -45,11 +57,13 @@ class HttpClient:
                 logging.error(json)
                 raise HttpException()
 
+    @requests_init_required
     async def _post(self, pathway: str, payload: dict = None) -> dict:
         async with self._requests.post(self.BASE_URL + pathway,
                                        json=payload) as resp:
             return await self.__handle_resp(resp)
 
+    @requests_init_required
     async def _get(self, pathway: str, payload: dict = None) -> dict:
         async with self._requests.get(self.BASE_URL + pathway,
                                       json=payload) as resp:
