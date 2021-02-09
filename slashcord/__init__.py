@@ -46,6 +46,7 @@ from ._exceptions import (
     StartupNotCalled
 )
 from ._guild import Guild
+from ._models import WebhookModel
 from ._message import Message, Embed
 from .http import HttpClient, HttpServer
 
@@ -63,6 +64,8 @@ assert WebhookException
 assert InvalidSignature
 assert InvalidJson
 assert StartupNotCalled
+
+assert WebhookModel
 
 
 __version__ = "0.0.2"
@@ -92,7 +95,7 @@ class SlashCord(HttpClient):
             Client public key.
         webhook_server : WebhookServer, optional
             Used to configure webhook server, set as None to disable.
-            by default WebhookServer
+            by default WebhookServer()
 
         Notes
         -----
@@ -169,7 +172,7 @@ class SlashCord(HttpClient):
             await self._server.close()
 
     def webhook(self, ed25519: str, timestamp: str,
-                body: bytes) -> dict:
+                body: bytes) -> WebhookModel:
         """Used to validate webhook.
 
         Parameters
@@ -189,14 +192,8 @@ class SlashCord(HttpClient):
 
         Returns
         -------
-        dict
-            Json data.
+        WebhookModel
         """
-
-        try:
-            json = JSONDecoder(body)
-        except JSONDecodeError:
-            raise InvalidJson()
 
         try:
             self._verify_key.verify(
@@ -206,7 +203,12 @@ class SlashCord(HttpClient):
         except BadSignatureError:
             raise InvalidSignature()
 
-        return json
+        try:
+            json = JSONDecoder(body)
+        except JSONDecodeError:
+            raise InvalidJson()
+
+        return WebhookModel(**json)
 
     def guild(self, guild_id: int) -> Guild:
         """Used to interact with guild.

@@ -1,6 +1,7 @@
 from aiohttp import web
 
 from .._exceptions import InvalidSignature, InvalidJson
+from .._models import WebhookModel
 
 
 class HttpServer:
@@ -81,7 +82,7 @@ class HttpServer:
         body = await request.read()
 
         try:
-            json = self._upper.webhook(
+            webhook: WebhookModel = self._upper.webhook(
                 request.headers["X-Signature-Ed25519"],
                 request.headers["X-Signature-Timestamp"],
                 body
@@ -93,6 +94,6 @@ class HttpServer:
         except InvalidJson:
             return self.__response(error="Invalid json", status_code=400)
 
-        json
+        webhook
 
         return self.__response()
