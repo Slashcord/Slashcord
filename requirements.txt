@@ -1,5 +1,6 @@
 aiohttp[speedups]
 PyNaCl
+aiojobs
 asynctest
 sphinxcontrib-trio
 sphinx-material

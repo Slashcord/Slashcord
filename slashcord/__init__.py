@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import aiojobs
+
 from functools import wraps
 from aiohttp import ClientSession
 
@@ -169,6 +171,8 @@ class SlashCord(HttpClient):
         )
 
         if self._server:
+            self._scheduler = await aiojobs.create_scheduler()
+
             await self._server.start()
 
     async def close(self) -> None:
@@ -183,6 +187,7 @@ class SlashCord(HttpClient):
         await self._requests.close()
 
         if self._server:
+            await self._scheduler.close()
             await self._server.close()
 
     def listener(self, command: Command):
@@ -254,12 +259,12 @@ class SlashCord(HttpClient):
 
         return WebhookModel(**json)
 
-    def guild(self, guild_id: int) -> Guild:
+    def guild(self, guild_id: str) -> Guild:
         """Used to interact with guild.
 
         Parameters
         ----------
-        guild_id : int
+        guild_id : str
 
         Returns
         -------

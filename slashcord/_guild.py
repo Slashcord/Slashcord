@@ -27,30 +27,41 @@ from ._settings import Command
 
 
 class Guild:
-    def __init__(self, upper: object, guild_id: int) -> None:
+    def __init__(self, upper: object, guild_id: str) -> None:
         self._upper = upper
         self.guild_id = guild_id
 
-    def listener(self, command: Command = None):
+    def listener(self, command: Command):
         """Used to listen to command.
 
         Parameters
         ----------
-        command : Command, optional
-            Command to listen to, if None all commands
-            will be received.
+        command : Command
 
         Notes
         -----
         Webhook server must be enabled.
         """
 
-        assert self._upper._server
+        assert self._server
 
         def decorator(func):
             @wraps(func)
             async def _add_listener(*args, **kwargs):
-                pass
+                # Keep it simple and just overwrite the command
+                # every time the script is started.
+                command_id = (await self.create_command(command)).id
+
+                if self.guild_id not in self._upper._guild_commands:
+                    self._upper._guild_commands[self.guild_id] = {}
+
+                if (command_id not in
+                        self._upper._guild_commands[self.guild_id]):
+                    self._upper._guild_commands[self.guild_id][command_id] = []
+
+                self._upper._guild_commands[self.guild_id][command_id].append(
+                    func
+                )
 
             return _add_listener
 

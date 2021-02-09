@@ -118,16 +118,19 @@ class HttpServer:
         except InvalidJson:
             return self.__response(error="Invalid json", status_code=400)
 
+        # Handles calling the event listeners.
         if webhook.id in self._upper._global_commands:
             await call_listeners(
                 self._upper._global_commands[webhook.id],
-                webhook
+                webhook,
+                self._upper._scheduler
             )
         elif (webhook.guild_id in self._upper._guild_commands and
                 webhook.id in self._upper._guild_commands[webhook.guild_id]):
             await call_listeners(
                 self._upper._guild_commands[webhook.guild_id][webhook.id],
-                webhook
+                webhook,
+                self._upper._scheduler
             )
 
         return self.__response({"type": webhook.type})

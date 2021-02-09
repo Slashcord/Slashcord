@@ -21,16 +21,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from asyncio import iscoroutinefunction
+from aiojobs import Scheduler
 from typing import Coroutine, List
 
 from ._models import WebhookModel
 
 
 async def call_listeners(funcs: List[Coroutine],
-                         webhook: WebhookModel) -> None:
+                         webhook: WebhookModel,
+                         scheduler: Scheduler) -> None:
+    """Used to call listeners.
+
+    Parameters
+    ----------
+    funcs : List[Coroutine]
+        List of funcs to call.
+    webhook : WebhookModel
+        WebhookModel to pass.
+    scheduler : Scheduler
+        Scheduler instance to scheduler funcs.
+    """
     for func in funcs:
-        if iscoroutinefunction(func):
-            await func(webhook=webhook)
-        else:
-            func(webhook=webhook)
+        await scheduler.spawn(func(webhook=webhook))
