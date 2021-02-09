@@ -21,36 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import asynctest
+from ._client import HttpClient
+from ._server import HttpServer
 
-from . import SlashCord, Command, CommandChoice
-
-
-class TestSlashCord(asynctest.TestCase):
-    use_default_loop = True
-
-    async def setUp(self) -> None:
-        self.slash_cord = SlashCord(
-            token="...",
-            client_id="...",
-            public_key="..."
-        )
-
-        await self.slash_cord.start()
-
-    async def tearDown(self) -> None:
-        await self.slash_cord.close()
-
-    async def test_getting_commads(self) -> None:
-        await self.slash_cord.commands()
-
-    async def test_create_command(self) -> None:
-        await self.slash_cord.create_command(
-            Command(
-                "word", "Command created by SlashCord for testing"
-            ).option(
-                "choice", "Choices you can select", required=True
-            ).string([
-                CommandChoice("Choice 1", "choice_1")
-            ])
-        )
+assert HttpClient, HttpServer

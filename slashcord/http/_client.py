@@ -26,7 +26,7 @@ import logging
 from aiohttp import ClientSession, ClientResponse
 from json import JSONDecodeError
 
-from ._exceptions import HttpException
+from .._exceptions import HttpException
 
 
 class HttpClient:
@@ -34,7 +34,6 @@ class HttpClient:
     _requests: ClientSession
 
     async def __handle_resp(self, resp: ClientResponse) -> dict:
-        print(await resp.read())
         try:
             json = await resp.json()
         except JSONDecodeError:

@@ -33,7 +33,8 @@ setup(
     install_requires=get_requirements(),
     license=get_variable("__license__"),
     packages=[
-        "slashcord"
+        "slashcord",
+        "slashcord.http"
     ],
     python_requires=">=3.6",
     include_package_data=True,
