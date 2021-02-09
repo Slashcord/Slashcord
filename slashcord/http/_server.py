@@ -70,7 +70,7 @@ class HttpServer:
 
         if ("X-Signature-Ed25519" not in request.headers
                 or "X-Signature-Timestamp" not in request.headers):
-            return self.__response(error="Missing headers", status_code=500)
+            return self.__response(error="Missing headers", status_code=400)
 
         body = await request.read()
 
