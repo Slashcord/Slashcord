@@ -22,6 +22,7 @@ SOFTWARE.
 """
 
 from aiohttp import ClientSession
+from nacl.signing import VerifyKey
 
 from ._settings import Command, CommandChoice
 from ._exceptions import (
@@ -98,8 +99,8 @@ class SlashCord(HttpClient):
         self._requests = None
 
         self._client_id = client_id
-        self._public_key = public_key
         self._auth += token
+        self._verify_key = VerifyKey(bytes.fromhex(public_key))
 
     async def start(self) -> None:
         """Used to start up SlashCord, must be called
