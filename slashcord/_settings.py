@@ -201,6 +201,8 @@ class Command:
             "options": []
         }
 
+        self.name = name
+
     def option(self, name: str, description: str,
                required: bool = False
                ) -> CommandType:

@@ -21,6 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+from functools import wraps
 from aiohttp import ClientSession
 
 from json import JSONDecodeError, JSONDecoder
@@ -126,6 +127,8 @@ class SlashCord(HttpClient):
         else:
             self._auth = "Bot "
 
+        self._auth += token
+
         if webhook_server:
             self._server = HttpServer(
                 webhook_server._ip, webhook_server._port, self
@@ -136,7 +139,6 @@ class SlashCord(HttpClient):
         self._requests = None
 
         self._client_id = client_id
-        self._auth += token
         self._verify_key = VerifyKey(bytes.fromhex(public_key))
 
     async def start(self) -> None:
@@ -170,6 +172,25 @@ class SlashCord(HttpClient):
 
         if self._server:
             await self._server.close()
+
+    def listen(self, command: Command = None):
+        """Used to listen to command.
+
+        Parameters
+        ----------
+        command : Command, optional
+            Command to listen to, if None all commands
+            will be received.
+        """
+
+        def decorator(func):
+            @wraps(func)
+            async def _add_listener(*args, **kwargs):
+                pass
+
+            return _add_listener
+
+        return decorator
 
     def webhook(self, ed25519: str, timestamp: str,
                 body: bytes) -> WebhookModel:

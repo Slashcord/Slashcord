@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+from functools import wraps
+
 from ._settings import Command
 
 
@@ -28,6 +30,25 @@ class Guild:
     def __init__(self, upper: object, guild_id: int) -> None:
         self._upper = upper
         self.guild_id = guild_id
+
+    def listen(self, command: Command = None):
+        """Used to listen to command.
+
+        Parameters
+        ----------
+        command : Command, optional
+            Command to listen to, if None all commands
+            will be received.
+        """
+
+        def decorator(func):
+            @wraps(func)
+            async def _add_listener(*args, **kwargs):
+                pass
+
+            return _add_listener
+
+        return decorator
 
     async def create_command(self, command: Command) -> None:
         await self._upper._post(
