@@ -24,6 +24,7 @@ SOFTWARE.
 from functools import wraps
 
 from ._settings import Command
+from ._models import CommandModel
 
 
 class Guild:
@@ -67,10 +68,23 @@ class Guild:
 
         return decorator
 
-    async def create_command(self, command: Command) -> None:
-        await self._upper._post(
+    async def create_command(self, command: Command) -> CommandModel:
+        """Used to create guild command.
+
+        Parameters
+        ----------
+        command : Command
+
+        Returns
+        -------
+        CommandModel
+        """
+
+        data = await self._upper._post(
             "applications/{}/guilds/{}/commands".format(
                 self._upper.client_id, self.guild_id
             ),
             payload=command._payload
         )
+
+        return CommandModel(**data)

@@ -21,6 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+from typing import Coroutine, List, AsyncGenerator
 import aiojobs
 
 from functools import wraps
@@ -172,7 +173,6 @@ class SlashCord(HttpClient):
 
         if self._server:
             self._scheduler = await aiojobs.create_scheduler()
-
             await self._server.start()
 
     async def close(self) -> None:
@@ -189,6 +189,23 @@ class SlashCord(HttpClient):
         if self._server:
             await self._scheduler.close()
             await self._server.close()
+
+    async def _call_listeners(self, funcs: List[Coroutine],
+                              webhook: WebhookModel) -> None:
+        """Used to call listeners.
+
+        Parameters
+        ----------
+        funcs : List[Coroutine]
+            List of funcs to call.
+        webhook : WebhookModel
+            WebhookModel to pass.
+        """
+
+        assert self._server
+
+        for func in funcs:
+            await self._scheduler.spawn(func(webhook=webhook))
 
     def listener(self, command: Command):
         """Used to listen to command.
@@ -273,12 +290,33 @@ class SlashCord(HttpClient):
 
         return Guild(self, guild_id)
 
-    async def commands(self) -> None:
-        await self._get(
+    async def commands(self) -> AsyncGenerator[CommandModel, None]:
+        """Used to list global commands.
+
+        Yields
+        -------
+        CommandModel
+        """
+
+        data = await self._get(
             "applications/{}/commands".format(self._client_id)
         )
 
+        for command in data:
+            yield CommandModel(**command)
+
     async def create_command(self, command: Command) -> CommandModel:
+        """Used to create a global command.
+
+        Parameters
+        ----------
+        command : Command
+
+        Returns
+        -------
+        CommandModel
+        """
+
         data = await self._post(
             "applications/{}/commands".format(self._client_id),
             payload=command._payload

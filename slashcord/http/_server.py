@@ -25,7 +25,6 @@ from aiohttp import web
 
 from .._exceptions import InvalidSignature, InvalidJson
 from .._models import WebhookModel
-from .._misc import call_listeners
 
 
 class HttpServer:
@@ -120,17 +119,17 @@ class HttpServer:
 
         # Handles calling the event listeners.
         if webhook.id in self._upper._global_commands:
-            await call_listeners(
+            await self._upper._call_listeners(
                 self._upper._global_commands[webhook.id],
-                webhook,
-                self._upper._scheduler
+                webhook
             )
+
         elif (webhook.guild_id in self._upper._guild_commands and
                 webhook.id in self._upper._guild_commands[webhook.guild_id]):
-            await call_listeners(
+
+            await self._upper._call_listeners(
                 self._upper._guild_commands[webhook.guild_id][webhook.id],
-                webhook,
-                self._upper._scheduler
+                webhook
             )
 
         return self.__response({"type": webhook.type})
