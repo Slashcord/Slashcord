@@ -1,2 +1,3 @@
-# Wrapper
-Async &amp; Sync wrapper for Discord
+<p align="center">
+  <img src="https://i.imgur.com/6Lm2l29.png">
+</p>
