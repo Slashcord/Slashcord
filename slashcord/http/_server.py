@@ -119,6 +119,7 @@ class HttpServer:
 
         # Handles calling the event listeners.
         if webhook.id in self._upper._global_commands:
+
             await self._upper._call_listeners(
                 self._upper._global_commands[webhook.id],
                 webhook
