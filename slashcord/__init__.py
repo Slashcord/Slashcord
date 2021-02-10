@@ -21,9 +21,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from typing import Coroutine, List, AsyncGenerator
 import aiojobs
 
+from typing import Coroutine, List, AsyncGenerator
 from functools import wraps
 from aiohttp import ClientSession
 
