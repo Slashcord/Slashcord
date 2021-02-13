@@ -156,7 +156,7 @@ class SlashCord(HttpClient):
         # }
         self._guild_commands = {}
 
-    async def start(self) -> None:
+    async def startup(self) -> None:
         """Used to start up SlashCord, must be called
            before making any other calls.
 
@@ -175,7 +175,7 @@ class SlashCord(HttpClient):
             self._scheduler = await aiojobs.create_scheduler()
             await self._server.start()
 
-    async def close(self) -> None:
+    async def shutdown(self) -> None:
         """Close underlying sessions.
 
         Notes
