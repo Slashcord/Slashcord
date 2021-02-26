@@ -83,8 +83,7 @@ __license__ = "MIT"
 class SlashCord(HttpClient):
     BASE_URL = "https://discord.com/api/v8/"
 
-    def __init__(self, token: str, client_id: int,
-                 public_key: str,
+    def __init__(self, token: str, client_id: int, public_key: str,
                  webhook_server: WebhookServer = WebhookServer()) -> None:
         """Wrapper for Discord's slash commands!
 
@@ -144,17 +143,19 @@ class SlashCord(HttpClient):
         self._client_id = client_id
         self._verify_key = VerifyKey(bytes.fromhex(public_key))
 
+        # Used for decorator
         # {
         #   "command_id": List[Coroutine],
         # }
-        self._global_commands = {}
+        self._global_funcs = {}
 
+        # Used for decorator
         # {
         #   "guild_id": {
         #       "command_id": List[Coroutine],
         #    }
         # }
-        self._guild_commands = {}
+        self._guild_funcs = {}
 
     async def startup(self) -> None:
         """Used to start up SlashCord, must be called
@@ -200,12 +201,16 @@ class SlashCord(HttpClient):
             List of funcs to call.
         webhook : WebhookModel
             WebhookModel to pass.
+
+        Notes
+        -----
+        Should be spawned with self._scheduler.spawn
         """
 
         assert self._server
 
         for func in funcs:
-            await self._scheduler.spawn(func(webhook=webhook))
+            func(webhook=webhook)
 
     def listener(self, command: Command):
         """Used to listen to command.
@@ -228,10 +233,10 @@ class SlashCord(HttpClient):
                 # every time the script is started.
                 command_id = (await self.create_command(command)).id
 
-                if command_id not in self._global_commands:
-                    self._global_commands[command_id] = []
+                if command_id not in self._global_funcs:
+                    self._global_funcs[command_id] = []
 
-                self._global_commands[command_id].append(func)
+                self._global_funcs[command_id].append(func)
 
             return _add_listener
 
@@ -317,9 +322,13 @@ class SlashCord(HttpClient):
         CommandModel
         """
 
-        data = await self._post(
-            "applications/{}/commands".format(self._client_id),
-            payload=command._payload
+        command_model = CommandModel(
+            **(
+                await self._post(
+                    "applications/{}/commands".format(self._client_id),
+                    payload=command._payload
+                )
+            )
         )
 
-        return CommandModel(**data)
+        return command_model

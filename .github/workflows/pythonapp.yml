@@ -23,3 +23,10 @@ jobs:
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude .git,__pycache__,docs/source/conf.py,old,build,dist
           # exit-zero treats all errors as warnings
           flake8 . --count --max-line-length=80 --statistics --exclude .git,__pycache__,docs/source/conf.py,old,build,dist
+      - name: Run unit tests
+        env:
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          GUILD_ID: ${{ secrets.GUILD_ID }}
+          PUBLIC_KEY: ${{ secrets.PUBLIC_KEY }}
+          TOKEN: ${{ secrets.TOKEN }}
+        run: python run_tests.py --token $TOKEN --client_id $CLIENT_ID --public_key $PUBLIC_KEY --guild_id $GUILD_ID

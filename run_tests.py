@@ -22,9 +22,26 @@ SOFTWARE.
 """
 
 import unittest
+import argparse
+import sys
 
-from slashcord.tests import *  # noqa: F403, F401
+from slashcord.tests import TestSlashCord
+
+
+cli = argparse.ArgumentParser()
+
+cli.add_argument("--token", type=str, default="")
+cli.add_argument("--client_id", type=int, default=0)
+cli.add_argument("--public_key", type=str, default="")
+cli.add_argument("--guild_id", type=int, default=0)
+
+args = vars(cli.parse_args())
 
 
 if __name__ == "__main__":
-    unittest.main()
+    TestSlashCord.token = args["token"]
+    TestSlashCord.client_id = args["client_id"]
+    TestSlashCord.public_key = args["public_key"]
+    TestSlashCord.guild_id = args["guild_id"]
+
+    unittest.main(argv=[sys.argv[0]])

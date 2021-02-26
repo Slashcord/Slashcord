@@ -64,6 +64,12 @@ class HttpClient:
             return await self.__handle_resp(resp)
 
     @requests_init_required
+    async def _patch(self, pathway: str, payload: dict = None) -> dict:
+        async with self._requests.patch(self.BASE_URL + pathway,
+                                        json=payload) as resp:
+            return await self.__handle_resp(resp)
+
+    @requests_init_required
     async def _get(self, pathway: str, payload: dict = None) -> dict:
         async with self._requests.get(self.BASE_URL + pathway,
                                       json=payload) as resp:

@@ -23,34 +23,48 @@ SOFTWARE.
 
 import asynctest
 
-from . import SlashCord, Command, CommandChoice
+from . import SlashCord, Command, CommandChoice, CommandModel
 
 
 class TestSlashCord(asynctest.TestCase):
     use_default_loop = True
 
+    token: str
+    client_id: int
+    public_key: str
+    guild_id: int
+
     async def setUp(self) -> None:
         self.slash_cord = SlashCord(
-            token="...",
-            client_id="...",
-            public_key="..."
+            token=self.token,
+            client_id=self.client_id,
+            public_key=self.public_key
         )
 
-        await self.slash_cord.start()
+        self.guild = self.slash_cord.guild(self.guild_id)
+
+        await self.slash_cord.startup()
 
     async def tearDown(self) -> None:
-        await self.slash_cord.close()
+        await self.slash_cord.shutdown()
 
     async def test_getting_commads(self) -> None:
-        await self.slash_cord.commands()
+        async for command in self.slash_cord.commands():
+            self.assertIsInstance(command, CommandModel)
 
-    async def test_create_command(self) -> None:
-        await self.slash_cord.create_command(
+    async def test_string_create_command(self) -> None:
+        model = await self.guild.create_command(
             Command(
-                "word", "Command created by SlashCord for testing"
+                name="testing",
+                description="Command created by SlashCord for testing"
             ).option(
-                "choice", "Choices you can select", required=True
+                name="choice",
+                description="Choices you can select",
+                required=True
             ).string([
-                CommandChoice("Choice 1", "choice_1")
+                CommandChoice("Choice 1", "choice_1"),
+                CommandChoice("Choice 2", "choice_2")
             ])
         )
+
+        self.assertIsInstance(model, CommandModel)

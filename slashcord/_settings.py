@@ -195,6 +195,8 @@ class Command:
 
         check_length(description, InvalidDescription)
 
+        self._name = name
+
         self._payload = {
             "name": name,
             "description": description,

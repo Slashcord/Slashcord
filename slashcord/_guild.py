@@ -53,14 +53,14 @@ class Guild:
                 # every time the script is started.
                 command_id = (await self.create_command(command)).id
 
-                if self.guild_id not in self._upper._guild_commands:
-                    self._upper._guild_commands[self.guild_id] = {}
+                if self.guild_id not in self._upper._guild_funcs:
+                    self._upper._guild_funcs[self.guild_id] = {}
 
                 if (command_id not in
-                        self._upper._guild_commands[self.guild_id]):
-                    self._upper._guild_commands[self.guild_id][command_id] = []
+                        self._upper._guild_funcs[self.guild_id]):
+                    self._upper._guild_funcs[self.guild_id][command_id] = []
 
-                self._upper._guild_commands[self.guild_id][command_id].append(
+                self._upper._guild_funcs[self.guild_id][command_id].append(
                     func
                 )
 
@@ -80,11 +80,15 @@ class Guild:
         CommandModel
         """
 
-        data = await self._upper._post(
-            "applications/{}/guilds/{}/commands".format(
-                self._upper.client_id, self.guild_id
-            ),
-            payload=command._payload
+        command_model = CommandModel(
+            **(
+                await self._upper._post(
+                    "applications/{}/guilds/{}/commands".format(
+                        self._upper._client_id, self.guild_id
+                    ),
+                    payload=command._payload
+                )
+            )
         )
 
-        return CommandModel(**data)
+        return command_model
