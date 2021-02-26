@@ -80,7 +80,7 @@ class Guild:
         CommandModel
         """
 
-        command_model = CommandModel(
+        return CommandModel(
             **(
                 await self._upper._post(
                     "applications/{}/guilds/{}/commands".format(
@@ -90,5 +90,3 @@ class Guild:
                 )
             )
         )
-
-        return command_model

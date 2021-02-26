@@ -322,7 +322,7 @@ class SlashCord(HttpClient):
         CommandModel
         """
 
-        command_model = CommandModel(
+        return CommandModel(
             **(
                 await self._post(
                     "applications/{}/commands".format(self._client_id),
@@ -330,5 +330,3 @@ class SlashCord(HttpClient):
                 )
             )
         )
-
-        return command_model
